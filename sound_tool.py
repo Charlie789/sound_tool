@@ -5,6 +5,7 @@ import soundfile
 from librosa import display
 from matplotlib import pyplot as plt
 from scipy import fft, signal
+from scipy.signal import butter, lfilter
 
 loaded_files = {}
 
@@ -16,6 +17,7 @@ def main_menu():
     print('2. Wczytaj plik dźwiękowy')
     print('3. Odwróć plik')
     print('4. Filtr pasmowy')
+    print('5. Filtr dolnoprzepustowy')
     print('0. Koniec')
 
     choice = input('Wybierz: ')
@@ -28,6 +30,8 @@ def main_menu():
         reverse_file(chose_file())
     elif choice == '4':
         band_pass_filter(chose_file(), input('Dolny zakres filtru [Hz]: '), input('Górny zakres filtru [Hz]: '))
+    elif choice == '5':
+        butter_lowpass_filter(chose_file(), input('Częstotliwość odcięcia [Hz]: '))
     elif choice == '0':
         exit(0)
     else:
@@ -117,6 +121,23 @@ def band_pass_filter(file_name, low_cut, high_cut):
 
     b, a = signal.butter(order, [low, high], 'bandpass', analog=False)
     y = signal.filtfilt(b, a, loaded_files[file_name][0], axis=0)
+    soundfile.write(new_file_name, y, loaded_files[file_name][1])
+    ask_load_file(new_file_name)
+
+
+def butter_lowpass(cutoff, fs, order=5):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    return b, a
+
+
+def butter_lowpass_filter(file_name, cutoff):
+    new_file_name = file_name[:-4] + '_low.wav'
+
+    b, a = butter_lowpass(float(cutoff), loaded_files[file_name][1], order=5)
+    y = lfilter(b, a, loaded_files[file_name][0])
+
     soundfile.write(new_file_name, y, loaded_files[file_name][1])
     ask_load_file(new_file_name)
 
