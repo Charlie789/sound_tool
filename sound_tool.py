@@ -1,9 +1,10 @@
 import librosa
 import numpy as np
+import scipy.fftpack as fftpk
 import soundfile
 from librosa import display
 from matplotlib import pyplot as plt
-from scipy import fft
+from scipy import fft, signal
 
 loaded_files = {}
 
@@ -14,6 +15,7 @@ def main_menu():
     print('1. Pokaż wykresy')
     print('2. Wczytaj plik dźwiękowy')
     print('3. Odwróć plik')
+    print('4. Filtr pasmowy')
     print('0. Koniec')
 
     choice = input('Wybierz: ')
@@ -24,6 +26,8 @@ def main_menu():
         load_file(file_name)
     elif choice == '3':
         reverse_file(chose_file())
+    elif choice == '4':
+        band_pass_filter(chose_file(), input('Dolny zakres filtru [Hz]: '), input('Górny zakres filtru [Hz]: '))
     elif choice == '0':
         exit(0)
     else:
@@ -83,15 +87,14 @@ def draw_plot_time(files):
         subplt_index = subplt_index + 1
 
         #wykres w dziedzinie częstotliwości
-        n = len(file[0])
         T = 1 / file[1]
-        yf = fft.fft(file[0])
-        xf = np.linspace(0.0, 1.0/(2.0/T), int(n/2))
-        plt.subplot(len(files), 2, subplt_index)
-        plt.plot(xf, 2.0/n * np.abs(yf[:n//2]))
-        plt.xlabel('Częstotliwość [kHz]')
+        FFT = abs(fft.fft(file[0]))
+        freqs = fftpk.fftfreq(len(FFT), T)
+        ax = plt.subplot(len(files), 2, subplt_index)
+        plt.plot(freqs[range(len(FFT)//2)], FFT[range(len(FFT)//2)])
+        plt.xlabel('Częstotliwość [Hz]')
+        ax.set_ylim([0, 100])
         subplt_index = subplt_index + 1
-
 
     plt.tight_layout()
     plt.show()
@@ -100,6 +103,21 @@ def draw_plot_time(files):
 def reverse_file(file_name):
     new_file_name = file_name[:-4] + '_reverse.wav'
     soundfile.write(new_file_name, np.flip(loaded_files[file_name][0]), loaded_files[file_name][1])
+    ask_load_file(new_file_name)
+
+
+def band_pass_filter(file_name, low_cut, high_cut):
+    new_file_name = file_name[:-4] + '_band_pass.wav'
+
+    nyq = 0.5 * loaded_files[file_name][1]
+    low = float(low_cut) / nyq
+    high = float(high_cut) / nyq
+
+    order = 2
+
+    b, a = signal.butter(order, [low, high], 'bandpass', analog=False)
+    y = signal.filtfilt(b, a, loaded_files[file_name][0], axis=0)
+    soundfile.write(new_file_name, y, loaded_files[file_name][1])
     ask_load_file(new_file_name)
 
 
