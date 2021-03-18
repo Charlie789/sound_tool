@@ -11,15 +11,16 @@ loaded_files = {}
 
 
 def main_menu():
-    print()
-    print('** MENU **')
-    print('1. Pokaż wykresy')
-    print('2. Wczytaj plik dźwiękowy')
-    print('3. Odwróć plik')
-    print('4. Filtr pasmowy')
-    print('5. Filtr dolnoprzepustowy')
-    print('6. Filtr górnoprzepustowy')
-    print('0. Koniec')
+    print('''
+    ** MENU **
+    1. Pokaż wykresy
+    2. Wczytaj plik dźwiękowy
+    3. Odwróć plik
+    4. Filtr pasmowy
+    5. Filtr dolnoprzepustowy
+    6. Filtr górnoprzepustowy
+    0. Koniec
+    ''')
 
     choice = input('Wybierz: ')
     if choice == '1':
