@@ -18,6 +18,7 @@ def main_menu():
     print('3. Odwróć plik')
     print('4. Filtr pasmowy')
     print('5. Filtr dolnoprzepustowy')
+    print('6. Filtr górnoprzepustowy')
     print('0. Koniec')
 
     choice = input('Wybierz: ')
@@ -32,6 +33,8 @@ def main_menu():
         band_pass_filter(chose_file(), input('Dolny zakres filtru [Hz]: '), input('Górny zakres filtru [Hz]: '))
     elif choice == '5':
         butter_lowpass_filter(chose_file(), input('Częstotliwość odcięcia [Hz]: '))
+    elif choice == '6':
+        butter_highpass_filter(chose_file(), input('Częstotliwość odcięcia [Hz]: '))
     elif choice == '0':
         exit(0)
     else:
@@ -137,6 +140,22 @@ def butter_lowpass_filter(file_name, cutoff):
 
     b, a = butter_lowpass(float(cutoff), loaded_files[file_name][1], order=5)
     y = lfilter(b, a, loaded_files[file_name][0])
+
+    soundfile.write(new_file_name, y, loaded_files[file_name][1])
+    ask_load_file(new_file_name)
+
+
+def butter_highpass(cutoff, fs, order=5):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = signal.butter(order, normal_cutoff, btype='high', analog=False)
+    return b, a
+
+def butter_highpass_filter(file_name, cutoff):
+    new_file_name = file_name[:-4] + '_low.wav'
+
+    b, a = butter_highpass(float(cutoff), loaded_files[file_name][1], order=5)
+    y = signal.filtfilt(b, a, loaded_files[file_name][0])
 
     soundfile.write(new_file_name, y, loaded_files[file_name][1])
     ask_load_file(new_file_name)
