@@ -75,7 +75,7 @@ def load_file(file_name):
     Pomyślnie załadowano: {file_name}
     Liczba próbek: {len(file[0])}
     Częstotliwość próbkowania: {file[1]}
-    Czas trwania: {len(file[0]) / file[1]}
+    Czas trwania: {(len(file[0]) / file[1]):.2f}s
     ''')
 
     loaded_files[file_name] = file
@@ -152,8 +152,9 @@ def butter_highpass(cutoff, fs, order=5):
     b, a = signal.butter(order, normal_cutoff, btype='high', analog=False)
     return b, a
 
+
 def butter_highpass_filter(file_name, cutoff):
-    new_file_name = file_name[:-4] + '_low.wav'
+    new_file_name = file_name[:-4] + '_high.wav'
 
     b, a = butter_highpass(float(cutoff), loaded_files[file_name][1], order=5)
     y = signal.filtfilt(b, a, loaded_files[file_name][0])
